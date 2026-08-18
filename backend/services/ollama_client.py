@@ -11,19 +11,24 @@ _client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 def _chat(prompt: str, system: str = "", temperature: float = 0.7) -> str:
     """Send a chat request to Groq and return the response text."""
     if not _client:
-        raise ValueError("GROQ_API_KEY is not set in environment variables.")
+        print("Warning: GROQ_API_KEY is not set in environment variables.")
+        return ""
 
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    chat_completion = _client.chat.completions.create(
-        messages=messages,
-        model="llama-3.3-70b-versatile",
-        temperature=temperature,
-    )
-    return chat_completion.choices[0].message.content.strip()
+    try:
+        chat_completion = _client.chat.completions.create(
+            messages=messages,
+            model="llama-3.3-70b-versatile",
+            temperature=temperature,
+        )
+        return chat_completion.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"⚠️ Groq API Error: {e}")
+        return ""
 
 
 def generate_interview_questions(
